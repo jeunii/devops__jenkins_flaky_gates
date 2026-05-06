@@ -1,0 +1,22 @@
+You are working on a Jenkins CI/CD environment. The pipeline defined
+for the "flaky-pipeline" job has several critical issues that are
+causing incorrect deployment behavior:
+
+1. Deployments are reaching production even when the test stage fails.
+2. The approval gate is not behaving correctly on the main branch.
+3. The team is not receiving notifications when the pipeline fails.
+
+The Jenkinsfile is located at:
+/var/lib/jenkins/jobs/flaky-pipeline/config.xml
+
+Jenkins is running on http://localhost:8080
+Credentials: admin / admin
+
+Investigate the pipeline configuration and fix all three issues so
+that:
+- A failed Test stage prevents the Deploy stage from running
+- The Approve gate is required when running on the main branch
+- Failure notifications are sent when the pipeline fails
+
+Do not change the core logic of any stage — only fix the control
+flow and notification issues.

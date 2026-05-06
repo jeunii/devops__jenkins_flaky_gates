@@ -1,0 +1,22 @@
+{
+    "instance_id": "devops__jenkins_flaky_stage_gates",
+    "pipeline": "ironwood",
+    "task_type": "terminal_mastery",
+    "title": "Fix Flaky Jenkins Pipeline Stage Gates",
+    "track": "Realm Ironwood",
+    "difficulty_band": "hard",
+    "repo": {
+      "image_name": "micro1ai/ironwood-jenkins-flaky-gates:v1",
+      "repo_dir": "/workspace"
+    },
+    "FAIL_TO_PASS": [
+      "tests/test_hidden_f7a3c192_validate.py::test_catchError_removed",
+      "tests/test_hidden_f7a3c192_validate.py::test_approve_gate_correct",
+      "tests/test_hidden_f7a3c192_validate.py::test_failure_notification_exists"
+    ],
+    "PASS_TO_PASS": [],
+    "test_cmd": "python -m pytest tests/test_hidden_f7a3c192_validate.py -v -p no:pretty",
+    "log_parser": "parse_log_pytest",
+    "test_patch": "",
+    "golden_script": "solution.sh"
+  }

@@ -1,0 +1,102 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.40">
+  <actions/>
+  <description>
+    Flaky pipeline with broken stage gates. Used for Ironwood evaluation.
+  </description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition"
+              plugin="workflow-cps@2.90">
+    <script>
+pipeline {
+    agent any
+
+    environment {
+        APP_NAME     = &apos;flaky-app&apos;
+        DEPLOY_DIR   = &apos;/workspace/deploy&apos;
+        NOTIFY_SCRIPT = &apos;/usr/local/bin/notify.sh&apos;
+    }
+
+    stages {
+
+        stage(&apos;Build&apos;) {
+            steps {
+                echo &apos;Building application...&apos;
+                sh &apos;&apos;&apos;
+                    mkdir -p /workspace/build
+                    echo "build-artifact-v1.0" &gt; /workspace/build/artifact.txt
+                    echo "[Build] Artifact created at /workspace/build/artifact.txt"
+                &apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Test&apos;) {
+            steps {
+                // BUG 1: catchError masks the test failure.
+                // buildResult stays SUCCESS even when flaky_test.sh exits 1,
+                // so the pipeline continues and Deploy always runs.
+                catchError(buildResult: &apos;SUCCESS&apos;, stageResult: &apos;FAILURE&apos;) {
+                    sh &apos;/usr/local/bin/flaky_test.sh&apos;
+                }
+            }
+        }
+
+        stage(&apos;Approve&apos;) {
+            when {
+                // BUG 2: `not` inverts the condition.
+                // Approval is currently required on every branch EXCEPT main.
+                // Should be: when { branch &apos;main&apos; }
+                not {
+                    branch &apos;main&apos;
+                }
+            }
+            steps {
+                input message: &apos;Approve deployment to production?&apos;,
+                      ok: &apos;Deploy&apos;
+            }
+        }
+
+        stage(&apos;Deploy&apos;) {
+            // BUG 3: No when condition here.
+            // Deploy runs unconditionally regardless of Test result.
+            // Should guard with: when { expression { currentBuild.result != &apos;FAILURE&apos; } }
+            steps {
+                echo &apos;Deploying application...&apos;
+                sh &apos;&apos;&apos;
+                    mkdir -p /workspace/deploy
+                    cp /workspace/build/artifact.txt /workspace/deploy/artifact.txt
+                    echo "DEPLOYED" &gt; /workspace/deploy/status.txt
+                    echo "[Deploy] Artifact deployed to /workspace/deploy"
+                &apos;&apos;&apos;
+            }
+        }
+
+    }
+
+    post {
+        // BUG 4: Only success is handled.
+        // The team receives no notification when the pipeline fails.
+        success {
+            sh &quot;${NOTIFY_SCRIPT} success&quot;
+        }
+        // Missing: failure block
+    }
+}
+    </script>
+    <sandbox>true</sandbox>
+  </definition>
+
+  <triggers/>
+
+  <quietPeriod>0</quietPeriod>
+
+  <authToken/>
+
+  <disabled>false</disabled>
+
+</flow-definition>
