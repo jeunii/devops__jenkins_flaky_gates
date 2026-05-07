@@ -4,12 +4,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Java (Jenkins dependency) + utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    openjdk-17-jdk \
+    openjdk-21-jdk \
     curl \
     wget \
     git \
     bash \
     jq \
+    python3 \
+    python3-pytest \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Jenkins (pinned version)
@@ -29,11 +31,14 @@ RUN useradd --uid 1000 --create-home --shell /bin/bash user
 # Copy broken Jenkins job config and scripts
 COPY image_build/jenkins_home/ /var/lib/jenkins/
 COPY image_build/scripts/ /usr/local/bin/
+COPY tests/        /workspace/tests/
 RUN chmod +x /usr/local/bin/*.sh
+RUN chmod -R 777 /var/lib/jenkins
 
 # Copy entrypoint (starts Jenkins)
 COPY image_build/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 WORKDIR /workspace
+RUN chmod -R 777 /workspace
 USER user

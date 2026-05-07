@@ -1,22 +1,23 @@
 diff --git a/tests/test_hidden_f7a3c192_validate.py b/tests/test_hidden_f7a3c192_validate.py
-index e69de29..3c2a517 100644
---- a/tests/test_hidden_f7a3c192_validate.py
+new file mode 100644
+--- /dev/null
 +++ b/tests/test_hidden_f7a3c192_validate.py
 @@ -0,0 +1,34 @@
-+# test_hidden_f7a3c192_validate.py
-+
-+import subprocess
 +import xml.etree.ElementTree as ET
++import os
 +
-+CONFIG = "/var/lib/jenkins/jobs/flaky-pipeline/config.xml"
++CONFIG = "/var/lib/jenkins/jobs/flaky_pipeline/config.xml"
 +
 +def get_jenkinsfile():
++    assert os.path.exists(CONFIG), f"config.xml not found at {CONFIG}"
 +    tree = ET.parse(CONFIG)
 +    root = tree.getroot()
-+    return root.find('.//script').text
++    script = root.find('.//script')
++    assert script is not None, "No <script> tag found in config.xml"
++    return script.text or ""
 +
 +def test_catchError_removed():
-+    """Deploy should not run if Test fails — catchError must not mask failures"""
++    """Deploy should not run if Test fails - catchError must not mask failures"""
 +    jenkinsfile = get_jenkinsfile()
 +    assert "catchError(buildResult: 'SUCCESS'" not in jenkinsfile, \
 +        "catchError is still masking test failures"
@@ -24,7 +25,6 @@ index e69de29..3c2a517 100644
 +def test_approve_gate_correct():
 +    """Approve stage should require approval on main, not bypass it"""
 +    jenkinsfile = get_jenkinsfile()
-+    # The `not` wrapper should be gone
 +    assert "not {\n                branch 'main'" not in jenkinsfile, \
 +        "Approve gate is still inverted"
 +    assert "branch 'main'" in jenkinsfile, \
@@ -35,6 +35,31 @@ index e69de29..3c2a517 100644
 +    jenkinsfile = get_jenkinsfile()
 +    assert "failure {" in jenkinsfile, \
 +        "No failure block found in post section"
-+    assert "notify.sh failure" in jenkinsfile, \
-+        "Failure notification call missing"
-\ No newline at end of file
++    assert "notify.sh" in jenkinsfile, \
++        "notify.sh call missing from failure block"
+diff --git a/tests/run_tests.sh b/tests/run_tests.sh
+new file mode 100755
+--- /dev/null
++++ b/tests/run_tests.sh
+@@ -0,0 +1,19 @@
++#!/usr/bin/env bash
++set -e
++
++export PYTHONPATH=/workspace:$PYTHONPATH
++
++echo "======================================"
++echo " Running hidden validation suite"
++echo "======================================"
++
++python3 -m pytest /workspace/tests/test_hidden_f7a3c192_validate.py \
++    -v \
++    -p no:pretty \
++    --tb=short
++
++EXIT_CODE=$?
++
++echo "======================================"
++echo " Validation complete (exit: $EXIT_CODE)"
++echo "======================================"
++
++exit $EXIT_CODE

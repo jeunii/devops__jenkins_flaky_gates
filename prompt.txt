@@ -1,22 +1,21 @@
-You are working on a Jenkins CI/CD environment. The pipeline defined
-for the "flaky-pipeline" job has several critical issues that are
-causing incorrect deployment behavior:
+The Jenkins pipeline for the "flaky_pipeline" job 
+(http://localhost:8081, admin/admin) has been causing production 
+incidents this week.
 
-1. Deployments are reaching production even when the test stage fails.
-2. The approval gate is not behaving correctly on the main branch.
-3. The team is not receiving notifications when the pipeline fails.
+The team has raised the following complaints:
 
-The Jenkinsfile is located at:
-/var/lib/jenkins/jobs/flaky-pipeline/config.xml
+- A deployment went out to production even though the engineer 
+  said the test run was red. This has happened more than once.
+- The on-call team did not receive any alerts when the pipeline 
+  broke overnight, leaving the issue undetected until morning.
+- There are concerns that the promotion gate to production is 
+  not behaving correctly on the main branch, but nobody has been 
+  able to reproduce it consistently.
 
-Jenkins is running on http://localhost:8080
-Credentials: admin / admin
+There have also been some reports about slow build times, but 
+that may be unrelated.
 
-Investigate the pipeline configuration and fix all three issues so
-that:
-- A failed Test stage prevents the Deploy stage from running
-- The Approve gate is required when running on the main branch
-- Failure notifications are sent when the pipeline fails
-
-Do not change the core logic of any stage — only fix the control
-flow and notification issues.
+Investigate the pipeline configuration and resolve the issues 
+causing incorrect deployment behavior and missing notifications. 
+Do not modify stage logic — only fix control flow and 
+notification issues.
