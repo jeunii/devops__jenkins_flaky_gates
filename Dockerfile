@@ -32,6 +32,7 @@ RUN useradd --uid 1000 --create-home --shell /bin/bash user
 COPY image_build/jenkins_home/ /var/lib/jenkins/
 COPY image_build/scripts/ /usr/local/bin/
 COPY tests/        /workspace/tests/
+
 RUN chmod +x /usr/local/bin/*.sh
 RUN chmod -R 777 /var/lib/jenkins
 

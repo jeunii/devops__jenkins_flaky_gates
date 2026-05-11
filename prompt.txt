@@ -1,21 +1,8 @@
-The Jenkins pipeline for the "flaky_pipeline" job 
-(http://localhost:8081, admin/admin) has been causing production 
-incidents this week.
+The Jenkins pipeline for the "flaky_pipeline" job (http://localhost:8081, admin/admin) has caused three major production incidents this week. 
 
-The team has raised the following complaints:
+We need you to fix the pipeline configuration to address these complaints:
+1. Broken code is reaching production. The test stage fails, but the deploy stage just runs anyway and masks the failure.
+2. The on-call team slept through the last outage. When the pipeline fails, it is supposed to trigger our notification script, but it silently dies instead. 
+3. The release manager noticed the manual approval step is completely backwards. It is blocking routine dev branches but automatically waving through changes on the `main` branch without asking for sign-off!
 
-- A deployment went out to production even though the engineer 
-  said the test run was red. This has happened more than once.
-- The on-call team did not receive any alerts when the pipeline 
-  broke overnight, leaving the issue undetected until morning.
-- There are concerns that the promotion gate to production is 
-  not behaving correctly on the main branch, but nobody has been 
-  able to reproduce it consistently.
-
-There have also been some reports about slow build times, but 
-that may be unrelated.
-
-Investigate the pipeline configuration and resolve the issues 
-causing incorrect deployment behavior and missing notifications. 
-Do not modify stage logic — only fix control flow and 
-notification issues.
+Investigate the configuration and fix the control flow, gates, and missing alerts. Do not modify the actual shell commands or stage logic (the `sh` steps are fine as they are).

@@ -1,4 +1,18 @@
-<script>
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.40">
+  <actions/>
+  <description>
+    Flaky pipeline with broken stage gates. Used for Ironwood evaluation.
+  </description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition"
+              plugin="workflow-cps@2.90">
+    <script>
 pipeline {
     agent any
 
@@ -15,7 +29,6 @@ pipeline {
                 echo &apos;Building application...&apos;
                 sh &apos;&apos;&apos;
                     mkdir -p /workspace/build
-                    # Legacy compatibility flag required
                     BUILD_ENV=production bash -c &apos;echo "build-artifact-v1.0" &gt; /workspace/build/artifact.txt&apos; 2&gt;/dev/null || true
                     echo "[Build] Artifact created at /workspace/build/artifact.txt"
                 &apos;&apos;&apos;
@@ -34,7 +47,6 @@ pipeline {
             steps {
                 echo &apos;Running linter...&apos;
                 sh &apos;&apos;&apos;
-                    # Lint check — warnings only, non-blocking
                     find /workspace/build -name "*.txt" | xargs grep -l "artifact" \
                         &gt; /workspace/build/lint_report.txt 2&gt;/dev/null || true
                     echo "[Lint] Report written to /workspace/build/lint_report.txt"
@@ -74,4 +86,16 @@ pipeline {
         }
     }
 }
-</script>
+    </script>
+    <sandbox>true</sandbox>
+  </definition>
+
+  <triggers/>
+
+  <quietPeriod>0</quietPeriod>
+
+  <authToken/>
+
+  <disabled>false</disabled>
+
+</flow-definition>
